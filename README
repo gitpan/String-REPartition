@@ -7,7 +7,7 @@ used to partition data sets
 
 PREREQUISITES
 
-This suite requires Perl 5; I've only used it under Perl 5.004, so for
+This module requires Perl 5; I've only used it under Perl 5.005, so for
 anything lower, you're on your own.
 
 String::REPartition doesn't use any nonstandard modules.

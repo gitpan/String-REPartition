@@ -1,16 +1,18 @@
 # String::REPartition, a module used to partition data using a regular
 # expression.
 
-package String::REPartition;
+package REPartition;
 
 require 5;
 use strict;
-use vars qw(@ISA @EXPORT $VERSION);
+use vars qw(@ISA @EXPORT $VERSION $DEBUG);
 use Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(make_partition_re);
 
-$VERSION = "1.0";
+$VERSION = "1.1";
+
+$DEBUG = 0;
 
 # This is the main (and only) accessor function for this module.  Given a
 # ratio and a reference to a list of strings, it will produce a regular
@@ -26,6 +28,7 @@ sub make_partition_re {
   my(@words) = ();
 
   # Just checking inputs here.
+  warn("Checking inputs...\n") if $DEBUG;
   unless ($ratio && _is_numeric($ratio) && ($ratio > 0) && ($ratio < 1)) {
     return _whine ("Invalid ratio given.  Must be a number between 0 and 1.");
   }
@@ -34,19 +37,40 @@ sub make_partition_re {
   }
   @words = @{ $arryref };
 
+  chomp @words;
+
   # First we build a hash recording the number of strings with each length.
   foreach (@words) {
     $lenhash{length($_)}++;
+  }
+  if ($DEBUG) {
+    print "My first length hash looks like this:\n";
+    foreach my $key (sort {$a <=> $b} (keys %lenhash)) {
+      print "  $key -> $lenhash{$key}\n";
+    }
   }
 
   # And then use the _make_list subroutine to examine that hash and determine
   # a set of lengths which constitute the closest solution, given the ratio.
   my(@soln) = _make_list(\%lenhash,$ratio);
+  if ($DEBUG) {
+    print "First solution is: ";
+    print join('--', @soln);
+    print "\n";
+  }
 
-  # The new ratio will be the first value of the returned array.  It may or
+  # The new ratio will be the last value of the returned array.  It may or
   # may not be defined.  An undef ratio implies that an exact solution has
   # been found.
   $ratio = pop(@soln);
+  if ($DEBUG) {
+    if (defined $ratio) {
+      print "I found the ratio $ratio and want to split $soln[-1]\n";
+    }
+    else {
+      print "No ratio found -- must have found an exact solution on the first try\n";
+    }
+  }
   my($split) = pop(@soln) if defined $ratio;
   my($regex) = "^(";
 
@@ -55,6 +79,7 @@ sub make_partition_re {
   if (scalar @soln) {
     $regex .= join('|',map {'(' . '.{' . $_ . '})'} _shrink_list(@soln));
   }
+  print "Regex so far is $regex\n" if $DEBUG;
   my($splitlen) = 0;
   my(%alphahash) = ();
   my(@solns) = ();
@@ -64,10 +89,10 @@ sub make_partition_re {
   if (defined($ratio)) {
 
     # This is just setting a bunch of stuff up.
+    print "Starting to re-split\n" if $DEBUG;
     $splitlen = $split;
     my($splitval) = $lenhash{$split};
     my($letnum) = 0;
-    my($newratio) = 0;
     my($total) = 0;
 
     # We only want to play with the words of the appropriate length.
@@ -75,66 +100,87 @@ sub make_partition_re {
 
     # And now we will continue re-subdividing the words until we've been
     # asked to split the sample too much.
-    until ((int($splitval * $ratio)<=1)||(int($splitval * $ratio)>=($splitval - 1))) {
+    until (
+      (int($splitval * $ratio) <= 1) ||
+      (int($splitval * $ratio) >= ($splitval - 1)) ||
+      ($letnum >= $splitlen)
+    ) {
       %alphahash = ();
-      $total = 0;
 
       # Here we build a hash similar to the lenhash before.
       foreach my $word (@words) {
         $alphahash{substr($word,$letnum,1)}++;
-        $total++;
       }
 
       # And then build the solution with the new data.
       @soln = _make_list(\%alphahash,$ratio);
-      $newratio = pop(@soln);
-
+      $ratio = pop(@soln);
+      if ($DEBUG) {
+        if (defined $ratio) {
+          print "I found the ratio $ratio and want to split $soln[-1]\n";
+        }
+        else {
+              print "No ratio found -- must have found an exact solution\n";
+        }
+      }
       # Store the solution...
+      if ($DEBUG) {
+        print "Adding: " . join('--',@soln) . " to the solutions.\n";
+      }
       @{$solns[$letnum]} = @soln;
 
       # Maybe do some stuff if we have to further subdivide...
-      if (defined($newratio)) {
+      if (defined($ratio)) {
         $split = pop(@soln);
         @words = grep( (substr($_,$letnum,1) eq $split), @words );
-        $ratio = $newratio;
         $splitval = $alphahash{$split};
         $letnum++;
       }
 
       # Otherwise, make the loop bomb out so we can get on with our lives.
       else {
-        $ratio = 0;
+        $ratio = -1;
       }
+    }
+    if ($ratio >= 0 && (scalar @solns > 0)) {
+      pop(@{$solns[-1]});
     }
   }
 
   # Now, if we have some solutions from subdividing the remaining words, 
   # we want to incorporate that into our regex...
+  my($regex_annex) = "";
   if (scalar @solns) {
     my($prefix) = "";
     my($templetter) = "";
-    if (length($regex) > 2) {
-      $regex .= "|";
-    }
     foreach my $num (0..$#solns) {
       $splitlen--;
 
       # If there are more solutions in the solution array after the one
-      # we're looking at, then the first letter isn't part of the solution
+      # we're looking at, then the last letter isn't part of the solution
       # but rather the letter that'll be split for the *next* solution.
       # Thus we have to save it and store it.
       if ($num < $#solns) {
-        $templetter = shift(@{$solns[$num]});
+        $templetter = pop(@{$solns[$num]});
       }
       else {
         $templetter = '';
       }
-      $regex .= "($prefix\[" . join('',@{$solns[$num]}) . '].{' . 
-        $splitlen . '})|';
+      if (scalar @{$solns[$num]} > 0) {
+        $regex_annex .= "($prefix\[" . join('',@{$solns[$num]}) . ']';
+        if ($splitlen > 0) {
+          $regex_annex .= '.{' .  $splitlen . '}';
+        }
+        $regex_annex .= ')|';
+      }
       $prefix .= $templetter;
     }
-    chop $regex;
+    chop $regex_annex;
   }
+  if (length($regex) > 2 && length($regex_annex)) {
+    $regex .= "|";
+  }
+  $regex .= $regex_annex;
   $regex .= ")\$";
   $regex =~ s/\[\^/\[\\\^/g;
   return $regex;
@@ -356,16 +402,15 @@ strings, the returned regex would match 60 of the strings in the list and not
 match the other 40. 
 
 Keep in mind that, since only integer operations may be performed on these
-strings, (that is, there cannot be a regex which matches a fraction of a string),
-the target number is rounded down.  If you have 4 strings in your list and a
-ratio of 0.4, the resulting regex will match 1 string, not 1.6 strings.  More
-interestingly, with 4 strings and a ratio of 0.1, the resulting regex will
-almost certainly be C</^()$/> -- matching exactly 0 of the strings in the list.
-Furthermore, because of this rounding, the returned regex may not match
-precisely the number expected by multiplying the size of the list by the ratio,
-but instead be off by one or two in either direction.  The problems described
-here only affect very small data sets, which are probably better off dealt with
-by some other method.
+strings, (that is, there cannot be a regex which matches a fraction of a
+string), the target number is rounded down.  If you have 4 strings in your
+list and a ratio of 0.4, the resulting regex will match 1 string, not 1.6
+strings.  More interestingly, with 4 strings and a ratio of 0.1, the
+resulting regex will almost certainly be C</^()$/> -- matching exactly 0 of
+the strings in the list.  Furthermore, because of this rounding, the
+returned regex may not match precisely the number expected by multiplying
+the size of the list by the ratio, but instead be off by a small number
+in either direction.
 
 c<make_partition_re()> will return c<undef> on a failure, and print a warning
 to STDERR if C<$^W> is true.  Currently, the only errors that can occur relate
@@ -376,8 +421,8 @@ that a solution cannot be found if the input list consists only of many copies
 of the same string.
 
 The function finds its solution in roughly O(N) time -- however, in worst cases,
-I think it can get as high as O(N^2).  It's also possible that certain types
-of pathologically constructed data sets  can break things and cause it either to
+I think it can get as high as O(N^2).  It's also true that certain types
+of pathologically constructed data sets can break things and cause it either to
 return an invalid regex or to enter an infinite loop.  While I haven't run
 into any of this in my testing, I'm not confident that I've tested every
 possibility.
@@ -395,8 +440,9 @@ Another interesting feature is that a regex generated from a sufficiently
 large subset of your data will, approximately, match the appropriate percentage
 of strings from the complete data set.  This means that you do not need to have
 all of the data before you generate a regex to partition it.  As an example,
-generating a regex from roughly 10% of the words in /usr/dict/words gave me
-a regex that matched within .3% of the desired result of all of the words.
+generating a regex from roughly 10% of the words in /usr/dict/words (selected
+randomly) gave me a regex that matched within .3% of the desired result of all
+of the words.
 
 =head1 Future Work
 
@@ -410,11 +456,19 @@ take the time to check the list for uniqueness, so it will happily process
 data for which it may not be able to generate a valid solution.  This 
 may change in future versions.
 
+=item *
+
+Internal rounding is a problem in some cases.  The sections of the code which
+are most responsible for this were rather hastily conceived and no doubt could
+be somewhat improved.  However, they are also somewhat confusing and I need to
+make this release in order to fix a few bugs.  The rounding problem will be
+addressed in the next release.
+
 =back
 
 =head1 AUTHOR
 
-Copyright 1999 Avi Finkel <F<avi@finkel.org>>
+Copyright 2000 Avi Finkel <F<avi@finkel.org>>
 
 This package is free software and is provided "as is" without express
 or implied warranty.  It may be used, redistributed and/or modified

@@ -4,3 +4,9 @@ Avi Finkel <avi@finkel.org>
 Version 1.0 : 12/13/99 06:18
 
   No changes -- initial release
+
+Version 1.1 : 1/12/00 01:12
+
+  Made a few minor changes in order to fail more gracefully when presented with particularly degenerate data sets -- it's all Philip's fault.
+  The code now chomp()s all input, since perl does some interesting things with $ and trailing \n
+  Fixed a somewhat stupid bug which caused gross errors when dealing with some specifically degenerate data sets.  Thanks to Mark-Jason Dominus for finding that one.
