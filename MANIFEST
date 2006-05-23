@@ -2,5 +2,8 @@ Changes
 Makefile.PL
 README
 REPartition.pm
-test.pl
+t/basic.t
+t/pod.t
+t/pod_cover.t
 MANIFEST
+META.yml                                 Module meta-data (added by MakeMaker)

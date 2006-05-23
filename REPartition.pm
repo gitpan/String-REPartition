@@ -10,7 +10,7 @@ use Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(make_partition_re);
 
-$VERSION = "1.1";
+$VERSION = "1.3";
 
 $DEBUG = 0;
 
@@ -441,7 +441,7 @@ large subset of your data will, approximately, match the appropriate percentage
 of strings from the complete data set.  This means that you do not need to have
 all of the data before you generate a regex to partition it.  As an example,
 generating a regex from roughly 10% of the words in /usr/dict/words (selected
-randomly) gave me a regex that matched within .3% of the desired result of all
+randomly) gave me a regex that matched within .3% of the desired result for all
 of the words.
 
 =head1 Future Work
@@ -468,7 +468,7 @@ addressed in the next release.
 
 =head1 AUTHOR
 
-Copyright 2000 Avi Finkel <F<avi@finkel.org>>
+Copyright 2006 Avi Finkel <F<avi@finkel.org>>
 
 This package is free software and is provided "as is" without express
 or implied warranty.  It may be used, redistributed and/or modified
