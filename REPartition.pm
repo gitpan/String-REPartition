@@ -10,7 +10,7 @@ use Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(make_partition_re);
 
-$VERSION = "1.3";
+$VERSION = "1.4";
 
 $DEBUG = 0;
 

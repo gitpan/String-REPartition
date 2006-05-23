@@ -10,3 +10,7 @@ Version 1.1 : 1/12/00 01:12
   Made a few minor changes in order to fail more gracefully when presented with particularly degenerate data sets -- it's all Philip's fault.
   The code now chomp()s all input, since perl does some interesting things with $ and trailing \n
   Fixed a somewhat stupid bug which caused gross errors when dealing with some specifically degenerate data sets.  Thanks to Mark-Jason Dominus for finding that one.
+
+Version 1.4 : 5/23/00 01:54
+
+	Cleaning up tests to be more standard.  I'm not sure where 1.2 went.  1.3 had an accident.
