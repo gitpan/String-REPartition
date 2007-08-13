@@ -1,23 +1,13 @@
-# This script writes the Makefile for String::REPartition
-# See lib/ExtUtils/MakeMaker.pm for details of how to influence
-# the contents of the Makefile that is written.
-require 5.004;
-use strict;
-use ExtUtils::MakeMaker;
+use inc::Module::Install;
 
-WriteMakefile(
-    'NAME'	=> 'String::REPartition',
-    'VERSION_FROM' => 'REPartition.pm', # finds $VERSION
-    'dist'        => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
-);
+# Define metadata
+name     'String-REPartition';
+all_from 'lib/String/REPartition.pm';
 
-package MY;
+# Specific dependencies
+build_requires('Test::Dependencies');
+build_requires('Test::Pod');
+build_requires('Test::Pod::Coverage');
 
-sub libscan
-{ # Determine things that should *not* be installed
-    my($self, $path) = @_;
-    return '' if $path =~ m/~/;
-    $path;
-}
-
-__END__
+auto_install;
+WriteAll;

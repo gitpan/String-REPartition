@@ -10,7 +10,7 @@ use Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(make_partition_re);
 
-$VERSION = "1.4";
+$VERSION = "1.5";
 
 $DEBUG = 0;
 
@@ -261,7 +261,7 @@ sub _make_list {
   return (_get_words($besthash, $hashref, $target));
 }
 
-# This funciton takes as inputs a list of values, a target total to aim for and
+# This function takes as inputs a list of values, a target total to aim for and
 # a maximum bucket size to use.  It then constructs a suitable combination of
 # the values it was given to get as close to the target as possible without
 # using any values that aren't smaller than the max.  It doesn't do it very
@@ -468,7 +468,7 @@ addressed in the next release.
 
 =head1 AUTHOR
 
-Copyright 2006 Avi Finkel <F<avi@finkel.org>>
+Copyright 2007 Avi Finkel <F<avi@finkel.org>>
 
 This package is free software and is provided "as is" without express
 or implied warranty.  It may be used, redistributed and/or modified

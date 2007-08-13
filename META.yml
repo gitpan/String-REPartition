@@ -1,10 +1,19 @@
-# http://module-build.sourceforge.net/META-spec.html
-#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
-name:         String-REPartition
-version:      1.4
-version_from: REPartition.pm
-installdirs:  site
-requires:
-
+---
+abstract: Generates a regex to partition a data set
+author: 'Copyright 2007 Avi Finkel <F<avi@finkel.org>>'
+build_requires:
+  Test::Dependencies: 0
+  Test::Pod: 0
+  Test::Pod::Coverage: 0
 distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.17
+generated_by: Module::Install version 0.67
+license: unknown
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.3.html
+  version: 1.3
+name: String-REPartition
+no_index:
+  directory:
+    - inc
+    - t
+version: 1.5
