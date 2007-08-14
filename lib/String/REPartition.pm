@@ -1,18 +1,18 @@
 # String::REPartition, a module used to partition data using a regular
 # expression.
 
-package REPartition;
+package String::REPartition;
 
 require 5;
 use strict;
-use vars qw(@ISA @EXPORT $VERSION $DEBUG);
+use warnings;
 use Exporter;
-@ISA = qw(Exporter);
-@EXPORT = qw(make_partition_re);
+our @ISA = qw(Exporter);
+our @EXPORT = qw(make_partition_re);
 
-$VERSION = "1.5";
+our $VERSION = 1.6;
 
-$DEBUG = 0;
+my $DEBUG = 0;
 
 # This is the main (and only) accessor function for this module.  Given a
 # ratio and a reference to a list of strings, it will produce a regular
@@ -396,7 +396,7 @@ first argument a number between 0 and 1, representing a percentage, and as
 its second argument a reference to a list of strings.  It returns a regular
 expression which is guaranteed to match the percentage of the strings in
 the list represented by the number in the first argument.  More importantly,
-the regexreturned is guaranteed *not* to match the rest of the string in the
+the regex returned will *not* to match the rest of the string in the
 list.  That is, if the inputs were '0.6' and a reference to a list of 100
 strings, the returned regex would match 60 of the strings in the list and not
 match the other 40. 
@@ -443,6 +443,16 @@ all of the data before you generate a regex to partition it.  As an example,
 generating a regex from roughly 10% of the words in /usr/dict/words (selected
 randomly) gave me a regex that matched within .3% of the desired result for all
 of the words.
+
+=head1 Methods
+
+=over 4
+
+=item make_partition_re
+
+See description for details.
+
+=back
 
 =head1 Future Work
 

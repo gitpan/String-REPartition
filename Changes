@@ -17,4 +17,8 @@ Version 1.4 : 5/23/00 01:54
 
 Version 1.5 : 8/12/07 01:54
 
-	Fixing up dependenciy information, adding dep. tests.
+	Fixing up dependency information, adding dep. tests.
+
+Version 1.6 : 8/14/07 05:54
+
+	Removing use of mostly broken module Test::Dependencies

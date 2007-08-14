@@ -5,7 +5,6 @@ name     'String-REPartition';
 all_from 'lib/String/REPartition.pm';
 
 # Specific dependencies
-build_requires('Test::Dependencies');
 build_requires('Test::Pod');
 build_requires('Test::Pod::Coverage');
 

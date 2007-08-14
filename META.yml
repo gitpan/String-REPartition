@@ -2,7 +2,6 @@
 abstract: Generates a regex to partition a data set
 author: 'Copyright 2007 Avi Finkel <F<avi@finkel.org>>'
 build_requires:
-  Test::Dependencies: 0
   Test::Pod: 0
   Test::Pod::Coverage: 0
 distribution_type: module
@@ -16,4 +15,4 @@ no_index:
   directory:
     - inc
     - t
-version: 1.5
+version: 1.6
